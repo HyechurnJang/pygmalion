@@ -1,0 +1,7 @@
+#!/bin/bash
+
+NAME=$1
+SERV=$2
+ARGS=${@:3}
+
+docker run --name $NAME --hostname $NAME --volume-driver=nfs -v $SERV/opt/pygmalion/workspace:/pygics -d jzidea/pygics:latest pygics $ARGS
