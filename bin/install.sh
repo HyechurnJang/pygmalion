@@ -20,36 +20,40 @@ install_base() {
 }
 
 install_master() {
+    echo "install master node"
     local master_ip=$1
     local ips=`ip a | grep inet | awk '{print $2}' | sed -e "s/\/.*//g" | paste -sd"|"`
-    echo "install master node"
     if [ -z $master_ip ]; then
         usages
     fi
     if ! [[ "$master_ip" =~ ($ips) ]]; then
+        echo "$master_ip not in local ip list"
         usages
     fi
-    apt install -y nfs-kernel-server
-    mkdir -p /opt/pygmalion
-    mkdir -p /opt/pygmalion/workspace
-    cat <<EOF>> /etc/exports
-/opt/pygmalion/workspace    *(rw,sync,no_root_squash,no_subtree_check)
-EOF
-    systemctl restart nfs-kernel-server
-    systemctl enable nfs-kernel-server
-    install_base
-    docker swarm leave --force > /dev/null
+#    apt install -y nfs-kernel-server
+#    mkdir -p /opt/pygmalion
+#    mkdir -p /opt/pygmalion/workspace
+#    cat <<EOF>> /etc/exports
+#/opt/pygmalion/workspace    *(rw,sync,no_root_squash,no_subtree_check)
+#EOF
+#    systemctl restart nfs-kernel-server
+#    systemctl enable nfs-kernel-server
+#    install_base
+    docker swarm leave --force > /dev/null 2>&1
     local token=`docker swarm init --advertise-addr $master_ip | grep "\-\-token" | awk '{print $2}'`
     echo "install master node finished"
     echo "do typing followed to install on worker"
-    echo "    install.sh 192.168.0.101 $token"
+    echo "    install.sh $master_ip $token"
     echo ""
 }
 
 install_worker() {
     echo "install worker node"
-    install_base
-    docker swarm join --token SWMTKN-1-1la23f7y6y8joqxz27hac4j79yffyixcp15tjtlrnei14wwd1t-5tlmx4q9fm46drjzzd95g1l4q 172.17.8.101:2377
+    local master_ip=$1
+    local token=$2
+#    install_base
+    docker swarm leave --force > /dev/null 2>&1
+    docker swarm join --token $token $master_ip:2377
 }
 
 CMD=$1
@@ -58,7 +62,7 @@ case $CMD in
         install_master $2
         ;;
     worker)
-        install_worker
+        install_worker $2 $3
         ;;
     *)
         usages
