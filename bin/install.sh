@@ -43,8 +43,10 @@ install_master() {
     local token=`docker swarm init --advertise-addr $master_ip | grep "\-\-token" | awk '{print $2}'`
     echo "install master node finished"
     echo "do typing followed to install on worker"
+    echo ""
     echo "    install.sh worker $master_ip $token"
     echo ""
+    echo "enjoy pygmalion :)"
 }
 
 install_worker() {
