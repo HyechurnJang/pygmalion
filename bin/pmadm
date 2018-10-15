@@ -21,7 +21,7 @@ PYG_TOKEN = PYG_BASE_DIR + '/token'
 PYG_WORK_DIR = PYG_BASE_DIR + '/workspace'
 PYG_INST_LOG = PYG_BASE_DIR + '/install.log'
 
-def con_title(msg): print(msg, end=''); sys.stdout.flush()
+def con_title(msg): print('%-32s' % msg, end=''); sys.stdout.flush()
 def con_ok(): print(' --> [ OK ]'); sys.stdout.flush(); return True
 def con_fail(): print(' --> [ Fail ]'); sys.stdout.flush(); return False
 
@@ -50,7 +50,7 @@ def install_nfs_server():
     bash('install nfs server',
          'apt install -y nfs-kernel-server',
          'dpkg -l | grep nfs-kernel-server')
-    if os.system('cat /etc/exports | grep pygmalion'):
+    if os.system('cat /etc/exports | grep pygmalion > /dev/null 2>&1'):
         bash('register workspace',
              'echo "/opt/pygmalion/workspace    *(rw,sync,no_root_squash,no_subtree_check)"',
              'cat /etc/exports | grep pygmalion',
