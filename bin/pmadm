@@ -148,7 +148,9 @@ def exit_node():
         print('pygmalion is not installed')
         exit(1)
     
-    bash('leave docker swarm', 'docker swarm leave --force')
+    con_title('leave docker swarm')
+    os.system('docker swarm leave --force >> /dev/null 2>&1')
+    con_ok()
     bash('move token to old',
          'mv %s %s.old' % (PYG_TOKEN, PYG_TOKEN))
 
