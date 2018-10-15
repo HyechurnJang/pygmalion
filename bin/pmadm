@@ -138,7 +138,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Pygmalion Admin Tool')
     parser.add_argument('command', help='[ init | join | exit ]')
     args = parser.parse_args()
-    commnad = args.commnad
+    commnad = args.command
     if command == 'init':
         parser.add_argument('master', help='Master IP Address or Hostname')
         args = parser.parse_args()
