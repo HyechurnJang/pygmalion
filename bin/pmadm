@@ -54,6 +54,8 @@ def install_packages():
     command('register docker service', 'systemctl enable docker')
     command('download docker nfs driver', 'wget https://github.com/ContainX/docker-volume-netshare/releases/download/v%s/docker-volume-netshare_%s_amd64.deb -O /opt/pygmalion/netshare.deb' % (NFS_DRIVER_VER, NFS_DRIVER_VER))
     command('install docker nfs driver', 'dpkg -i /opt/pygmalion/netshare.deb')
+    command('restart docker nfs driver', 'systemctl restart docker-volume-netshare')
+    command('register docker nfs driver', 'systemctl enable docker-volume-netshare')
     command('download pygics image', 'docker pull jzidea/pygics:latest')
 
 def get_ips():
