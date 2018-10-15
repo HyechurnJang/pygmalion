@@ -6,50 +6,69 @@ PYG_WORK_DIR="$PYG_BASE_DIR/workspace"
 PYG_INST_LOG="$PYG_BASE_DIR/install.log"
 
 usages() {
-    echo "Usages : install.sh [master|worker]"
-    echo "    master <MASTER_NODE_IP> : install master node"
-    echo "    worker <MASTER_NODE_IP> <TOKEN> : install worker node"
-    echo ""
-    exit 1
+	echo "Usages : pmadm [init|join|exit]"
+	echo "    init <MASTER_NODE_IP> : install master node"
+	echo "    join <MASTER_NODE_IP> <TOKEN> : install worker node"
+	echo "    exit : uninstall node"
+	echo ""
+	exit 1
 }
 
-install_prepare() {
-    echo "prepare installation"
-    if [ -f $PYG_INSTALL_LOG ]; then
-        echo "pygmalion already installed"
-        exit 1
-    fi
-    mkdir -p $PYG_BASE_DIR
-    mkdir -p $PYG_WORK_DIRs
-    touch $PYG_INST_LOG
-}
-
-uninstall_prepare() {
-    echo "prepare uninstallation"
-    if [ ! -f $PYG_INSTALL_LOG ]; then
-        echo "pygmalion is not installed"
-        exit 1
-    fi
+preapare_environment() {
+	echo "PREPARE PYGMALION ENVIRONMENT"
+	if [ -f $PYG_INSTALL_LOG ]; then
+		echo "pygmalion already installed"
+		exit 1
+	fi
+	echo -n "create directories"
+	mkdir -p $PYG_BASE_DIR
+	mkdir -p $PYG_WORK_DIR
+	touch $PYG_INST_LOG
+	echo " --> [ OK ]"
 }
 
 install_packages() {
-    echo "install packages"
-    apt install -y docker.io nfs-common >> $PYG_INST_LOG
-    systemctl restart docker >> $PYG_INST_LOG
-    systemctl enable docker >> $PYG_INST_LOG
-    docker pull jzidea/pygics:latest >> $PYG_INST_LOG
-}
-
-install_drivers() {
-    echo "install drivers"
-    curl https://github.com/ContainX/docker-volume-netshare/releases/download/v$NFS_DRIVER_VER/docker-volume-netshare_$NFS_DRIVER_VER_amd64.deb -o /opt/pygmalion/netshare.deb >> $PYG_INST_LOG
-    dpkg -i /opt/pygmalion/netshare.deb >> $PYG_INST_LOG
-    systemctl restart docker-volume-netshare >> $PYG_INST_LOG
-    systemctl enable docker-volume-netshare >> $PYG_INST_LOG
+	echo "INSTALL PACKAGES"
+	echo -n "install docker & nfs client"
+	apt install -y docker.io nfs-common >> $PYG_INST_LOG 2>&1
+	if [ $? > 0 ]; then
+		echo " --> [ Failed ]"
+		exit 1
+	else
+		systemctl restart docker >> $PYG_INST_LOG 2>&1
+		systemctl enable docker >> $PYG_INST_LOG 2>&1
+		echo " --> [ OK ]"
+	fi
+	echo -n "download docker nfs driver"
+	curl https://github.com/ContainX/docker-volume-netshare/releases/download/v$NFS_DRIVER_VER/docker-volume-netshare_$NFS_DRIVER_VER_amd64.deb -o /opt/pygmalion/netshare.deb >> $PYG_INST_LOG 2>&1
+    if [ $? > 0 ]; then
+		echo " --> [ Failed ]"
+		exit 1
+	else
+		echo " --> [ OK ]"
+	fi
+	echo -n "install docker nfs driver"
+    dpkg -i /opt/pygmalion/netshare.deb >> $PYG_INST_LOG 2>&1
+    if [ $? > 0 ]; then
+		echo " --> [ Failed ]"
+		exit 1
+	else
+		systemctl restart docker-volume-netshare >> $PYG_INST_LOG 2>&1
+    	systemctl enable docker-volume-netshare >> $PYG_INST_LOG 2>&1
+		echo " --> [ OK ]"
+	fi
+	echo -n "download pygics image"
+    docker pull jzidea/pygics:latest >> $PYG_INST_LOG 2>&1
+    if [ $? > 0 ]; then
+		echo " --> [ Failed ]"
+		exit 1
+	else
+		echo " --> [ OK ]"
+	fi
 }
 
 install_nfs_server() {
-    echo "install nfs server"
+    echo "INSTALL NFS SERVER"
     apt install -y nfs-kernel-server >> $PYG_INST_LOG
     mkdir -p $PYG_WORK_DIR
     echo "" >> /etc/exports
