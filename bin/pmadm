@@ -144,7 +144,7 @@ if __name__ == '__main__':
     address = args.address
     token = args.token
     
-    if command == 'init' and address != '': install_master(master)
-    elif command == 'join' and address != '' and token != '': install_worker(master, token)
+    if command == 'init' and address != '': install_master(address)
+    elif command == 'join' and address != '' and token != '': install_worker(address, token)
     elif command == 'exit': exit_node()
     else: args.print_help()
