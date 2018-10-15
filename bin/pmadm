@@ -52,7 +52,7 @@ def install_packages():
     command('install docker & nfs client', 'apt install -y docker.io nfs-common')
     command('restart docker', 'systemctl restart docker')
     command('register docker service', 'systemctl enable docker')
-    command('download docker nfs driver', 'curl https://github.com/ContainX/docker-volume-netshare/releases/download/v%s/docker-volume-netshare_%s_amd64.deb -o /opt/pygmalion/netshare.deb' % (NFS_DRIVER_VER, NFS_DRIVER_VER))
+    command('download docker nfs driver', 'wget https://github.com/ContainX/docker-volume-netshare/releases/download/v%s/docker-volume-netshare_%s_amd64.deb -O /opt/pygmalion/netshare.deb' % (NFS_DRIVER_VER, NFS_DRIVER_VER))
     command('install docker nfs driver', 'dpkg -i /opt/pygmalion/netshare.deb')
     command('download pygics image', 'docker pull jzidea/pygics:latest')
 
