@@ -5,3 +5,6 @@ SERV=$2
 ARGS=${@:3}
 
 docker run --name $NAME --hostname $NAME --volume-driver=nfs -v $SERV/opt/pygmalion/workspace:/pygics -d jzidea/pygics:latest pygics $ARGS
+
+
+docker service create --name test -p 80:80 --replicas 3 --mount type=bind,source=/opt/pygmalion/workspace,destination=/pygics jzidea/pygics:latest pygics test.py
