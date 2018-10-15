@@ -103,8 +103,8 @@ def install_master(ip):
     
     prepare_env()
     install_nfs_server()
-#     install_packages()
-#     master_swarm(ip)
+    install_packages()
+    master_swarm(ip)
     
     print('MASTER INSTALLED')
 
@@ -112,8 +112,8 @@ def install_worker(ip, token):
     print('INSTALL WORKER NODE')
     
     prepare_env()
-#     install_packages()
-#     worker_swarm(ip, token)
+    install_packages()
+    worker_swarm(ip, token)
     
     print('WORKER INSTALLED')
 
