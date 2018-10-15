@@ -63,12 +63,12 @@ def install_nfs_server():
 
 def install_nfs_client(ip):
     print('INSTALL NFS CLIENT')
-    bash('install nfs server',
+    bash('install nfs client',
          'apt install -y nfs-common',
          'dpkg -l | grep nfs-common')
     if os.system('cat /etc/fstab | grep pygmalion > /dev/null 2>&1'):
         bash('register workspace',
-             'echo "%s:/opt/pygmalion/workspace /opt/pygmalion/workspace nfs defaults 0 0"',
+             'echo "%s:/opt/pygmalion/workspace /opt/pygmalion/workspace nfs defaults 0 0"' % ip,
              'cat /etc/fstab | grep pygmalion',
              output='/etc/fstab')
     bash('mount nfs server',
