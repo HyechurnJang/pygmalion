@@ -21,7 +21,7 @@ PYG_TOKEN = PYG_BASE_DIR + '/token'
 PYG_WORK_DIR = PYG_BASE_DIR + '/workspace'
 PYG_INST_LOG = PYG_BASE_DIR + '/install.log'
 
-def con_title(msg): print(msg, end=''); sys.stdout.flush()
+def con_title(msg): print('%-32s' % msg, end=''); sys.stdout.flush()
 def con_ok(): print(' --> [ OK ]'); sys.stdout.flush(); return True
 def con_fail(): print(' --> [ Fail ]'); sys.stdout.flush(); return False
 
@@ -49,8 +49,8 @@ def install_nfs_server():
     print('INSTALL NFS SERVER')
     bash('install nfs server',
          'apt install -y nfs-kernel-server',
-         'dpkg -l | grep nfs-kernel-servers')
-    if os.system('cat /etc/exports | grep pygmalion'):
+         'dpkg -l | grep nfs-kernel-server')
+    if os.system('cat /etc/exports | grep pygmalion > /dev/null 2>&1'):
         bash('register workspace',
              'echo "/opt/pygmalion/workspace    *(rw,sync,no_root_squash,no_subtree_check)"',
              'cat /etc/exports | grep pygmalion',
@@ -60,28 +60,42 @@ def install_nfs_server():
          'systemctl status -q --no-pager nfs-kernel-server')
     bash('register nfs service',
          'systemctl enable nfs-kernel-server')
-    
+
+def install_nfs_client(ip):
+    print('INSTALL NFS CLIENT')
+    bash('install nfs server',
+         'apt install -y nfs-common',
+         'dpkg -l | grep nfs-common')
+    if os.system('cat /etc/fstab | grep pygmalion > /dev/null 2>&1'):
+        bash('register workspace',
+             'echo "%s:/opt/pygmalion/workspace /opt/pygmalion/workspace nfs defaults 0 0"',
+             'cat /etc/fstab | grep pygmalion',
+             output='/etc/fstab')
+    bash('mount nfs server',
+         'mount -a',
+         'mount | grep pygmalion')
+
 def install_packages():
     print('INSTALL PACKAGES')
-    bash('install docker & nfs client',
-         'apt install -y docker.io nfs-common',
+    bash('install docker',
+         'apt install -y docker.io',
          'dpkg -l | grep docker')
     bash('restart docker',
          'systemctl restart docker',
          'systemctl status -q --no-pager docker')
     bash('register docker service',
          'systemctl enable docker')
-    bash('download docker nfs driver',
-         'wget https://github.com/ContainX/docker-volume-netshare/releases/download/v%s/docker-volume-netshare_%s_amd64.deb -O /opt/pygmalion/netshare.deb' % (NFS_DRIVER_VER, NFS_DRIVER_VER),
-         'ls /opt/pygmalion/netshare.deb')
-    bash('install docker nfs driver',
-         'dpkg -i /opt/pygmalion/netshare.deb',
-         'dpkg -l | grep docker-volume-netshare')
-    bash('restart docker nfs driver',
-         'systemctl restart docker-volume-netshare',
-         'systemctl status -q --no-pager docker-volume-netshare')
-    bash('register docker nfs driver',
-         'systemctl enable docker-volume-netshare')
+#     bash('download docker nfs driver',
+#          'wget https://github.com/ContainX/docker-volume-netshare/releases/download/v%s/docker-volume-netshare_%s_amd64.deb -O /opt/pygmalion/netshare.deb' % (NFS_DRIVER_VER, NFS_DRIVER_VER),
+#          'ls /opt/pygmalion/netshare.deb')
+#     bash('install docker nfs driver',
+#          'dpkg -i /opt/pygmalion/netshare.deb',
+#          'dpkg -l | grep docker-volume-netshare')
+#     bash('restart docker nfs driver',
+#          'systemctl restart docker-volume-netshare',
+#          'systemctl status -q --no-pager docker-volume-netshare')
+#     bash('register docker nfs driver',
+#          'systemctl enable docker-volume-netshare')
     bash('download pygics image',
          'docker pull jzidea/pygics:latest',
          'docker images | grep pygics')
@@ -123,7 +137,6 @@ def worker_swarm(ip, token):
          output=PYG_TOKEN)
 
 def install_master(ip):
-    print('INSTALL MASTER NODE')
     ips = get_ips().keys()
     if ip not in ips:
         print('%s not in local IP addresses' % ip)
@@ -136,19 +149,24 @@ def install_master(ip):
     master_swarm(ip)
 
 def install_worker(ip, token):
-    print('INSTALL WORKER NODE')
-    
     prepare_env()
+    install_nfs_client(ip)
     install_packages()
     worker_swarm(ip, token)
 
 def exit_node():
-    print('EXIT NODE')
     if not os.path.exists(PYG_INST_LOG):
         print('pygmalion is not installed')
         exit(1)
     
-    bash('leave docker swarm', 'docker swarm leave --force')
+    con_title('remove related system settings')
+    os.system('docker swarm leave --force >> /dev/null 2>&1')
+    os.system('sed -i "/pygmalion/d" /etc/fstab >> /dev/null 2>&1')
+    os.system('sed -i "/pygmalion/d" /etc/exports >> /dev/null 2>&1')
+    os.system('umount /opt/pygmalion/workspace >> /dev/null 2>&1')
+    os.system('systemctl restart nfs-kernel-server >> /dev/null 2>&1')
+    
+    con_ok()
     bash('move token to old',
          'mv %s %s.old' % (PYG_TOKEN, PYG_TOKEN))
 
