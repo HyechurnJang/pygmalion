@@ -81,7 +81,7 @@ def master_swarm(ip):
     
     with open(PYG_TOKEN, 'r') as fd: token = fd.read()
     print('run command on worker node followed...')
-    print(''
+    print('')
     print('    pmadm join -a %s -t %s' % (ip, token))
     print('')
 
