@@ -49,7 +49,7 @@ def install_nfs_server():
     print('INSTALL NFS SERVER')
     bash('install nfs server',
          'apt install -y nfs-kernel-server',
-         'dpkg -l | grep nfs-kernel-servers')
+         'dpkg -l | grep nfs-kernel-server')
     if os.system('cat /etc/exports | grep pygmalion'):
         bash('register workspace',
              'echo "/opt/pygmalion/workspace    *(rw,sync,no_root_squash,no_subtree_check)"',
