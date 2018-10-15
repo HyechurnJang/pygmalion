@@ -146,11 +146,11 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--address', default='', help='Master IP Address or Hostname')
     parser.add_argument('-t', '--token', default='', help='Token Generated on Master')
     args = parser.parse_args()
-    command = args.command
-    address = args.address
+    cmd = args.command
+    ip = args.address
     token = args.token
     
-    if command == 'init' and address != '': install_master(address)
-    elif command == 'join' and address != '' and token != '': install_worker(address, token)
-    elif command == 'exit': exit_node()
+    if cmd == 'init' and ip != '': install_master(ip)
+    elif cmd == 'join' and ip != '' and token != '': install_worker(ip, token)
+    elif cmd == 'exit': exit_node()
     else: args.print_help()
