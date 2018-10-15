@@ -96,9 +96,10 @@ def install_packages():
 #          'systemctl status -q --no-pager docker-volume-netshare')
 #     bash('register docker nfs driver',
 #          'systemctl enable docker-volume-netshare')
-    bash('download pygics image',
-         'docker pull jzidea/pygics:latest',
-         'docker images | grep pygics')
+    if os.system('docker images | grep pygics > /dev/null 2>&1'):
+        bash('download pygics image',
+             'docker pull jzidea/pygics:latest',
+             'docker images | grep pygics')
 
 def get_ips():
     max_possible = 128
