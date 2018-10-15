@@ -136,17 +136,17 @@ def exit_node():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Pygmalion Admin Tool')
-    parser.add_argument('command', required=True, help='[ init | join | exit ]')
+    parser.add_argument('command', help='[ init | join | exit ]')
     args = parser.parse_args()
     commnad = args.commnad
     if command == 'init':
-        parser.add_argument('master', required=True, help='Master IP Address or Hostname')
+        parser.add_argument('master', help='Master IP Address or Hostname')
         args = parser.parse_args()
         master = args.master
         install_master(master)
     elif command == 'join':
-        parser.add_argument('master', required=True, help='Master IP Address or Hostname')
-        parser.add_argument('token', required=True, help='Token Generated on Master')
+        parser.add_argument('master', help='Master IP Address or Hostname')
+        parser.add_argument('token', help='Token Generated on Master')
         args = parser.parse_args()
         master = args.master
         token = args.token
