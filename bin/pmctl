@@ -8,3 +8,25 @@ docker run --name $NAME --hostname $NAME --volume-driver=nfs -v $SERV/opt/pygmal
 
 
 docker service create --name test -p 80:80 --replicas 3 --mount type=bind,source=/opt/pygmalion/workspace,destination=/pygics jzidea/pygics:latest pygics test.py
+docker service create --name test --hostname test -p 80:80 --mode global --mount type=bind,source=/opt/pygmalion/workspace,destination=/pygics jzidea/pygics:latest pygics test.py
+
+docker service scale test=3
+docker service ls
+docker service ps test
+
+docker service create --name nginx --replicas 3 nginx:latest
+
+
+
+docker network create -d overlay test_net
+docker service create --name nginx --replicas 3 -p 80:80 --network test_net nginx:latest
+
+
+docker stack deploy --compose-file test.yml
+version: '3'
+services:
+  web:
+    image: nginx
+  cmp:
+    image: ubuntu
+    command: tail -f /var/log/lastlog

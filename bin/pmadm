@@ -15,7 +15,6 @@ import struct
 import docker
 import argparse
 
-NFS_DRIVER_VER = '0.34'
 PYG_BASE_DIR = '/opt/pygmalion'
 PYG_TOKEN = PYG_BASE_DIR + '/token'
 PYG_WORK_DIR = PYG_BASE_DIR + '/workspace'
@@ -85,17 +84,6 @@ def install_packages():
          'systemctl status -q --no-pager docker')
     bash('register docker service',
          'systemctl enable docker')
-#     bash('download docker nfs driver',
-#          'wget https://github.com/ContainX/docker-volume-netshare/releases/download/v%s/docker-volume-netshare_%s_amd64.deb -O /opt/pygmalion/netshare.deb' % (NFS_DRIVER_VER, NFS_DRIVER_VER),
-#          'ls /opt/pygmalion/netshare.deb')
-#     bash('install docker nfs driver',
-#          'dpkg -i /opt/pygmalion/netshare.deb',
-#          'dpkg -l | grep docker-volume-netshare')
-#     bash('restart docker nfs driver',
-#          'systemctl restart docker-volume-netshare',
-#          'systemctl status -q --no-pager docker-volume-netshare')
-#     bash('register docker nfs driver',
-#          'systemctl enable docker-volume-netshare')
     if os.system('docker images | grep pygics > /dev/null 2>&1'):
         bash('download pygics image',
              'docker pull jzidea/pygics:latest',
